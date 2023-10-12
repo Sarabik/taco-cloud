@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import sia.tacocloud.model.*;
 import sia.tacocloud.repository.IngredientRepository;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,11 +25,19 @@ public class DesignTacoController {
     @ModelAttribute
     public void addIngredientsToModel(Model model) {
         List<Ingredient> ingredients = ingredientRepository.findAll();
+        log.info("Ingredients: {}", ingredients);
         Ingredient.Type[] types = Ingredient.Type.values();
         for (Ingredient.Type type : types) {
             model.addAttribute(type.toString().toLowerCase(),
                     filterByType(ingredients, type));
         }
+    }
+
+    private Iterable<Ingredient> filterByType(List<Ingredient> ingredients, Ingredient.Type type) {
+        return ingredients
+                .stream()
+                .filter(x -> x.getType().equals(type))
+                .collect(Collectors.toList());
     }
 
     @ModelAttribute(name = "tacoOrder")
@@ -46,13 +53,6 @@ public class DesignTacoController {
     @GetMapping
     public String showDesignForm() {
         return "design";
-    }
-    private Iterable<Ingredient> filterByType(
-            List<Ingredient> ingredients, Ingredient.Type type) {
-        return ingredients
-                .stream()
-                .filter(x -> x.getType().equals(type))
-                .collect(Collectors.toList());
     }
 
     @PostMapping

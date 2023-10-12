@@ -5,17 +5,23 @@ import org.springframework.stereotype.Service;
 import sia.tacocloud.model.TacoOrder;
 import sia.tacocloud.repository.OrderRepository;
 
+import java.util.Date;
+import java.util.List;
+
 @Service
 @AllArgsConstructor
-public class JdbcOrderService implements OrderService {
+public class SimpleOrderService implements OrderService {
 
     private final OrderRepository orderRepository;
-    private final TacoService tacoService;
 
     @Override
     public TacoOrder save(TacoOrder order) {
-        orderRepository.save(order);
-        tacoService.saveTacos(order.getTacos(), order.getId());
-        return order;
+        order.setPlacedAt(new Date());
+        return orderRepository.save(order);
+    }
+
+    @Override
+    public List<TacoOrder> findAll() {
+        return orderRepository.findAll();
     }
 }
