@@ -1,6 +1,7 @@
 package sia.tacocloud.service;
 
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import sia.tacocloud.model.TacoOrder;
 import sia.tacocloud.repository.OrderRepository;
@@ -23,5 +24,11 @@ public class SimpleOrderService implements OrderService {
     @Override
     public List<TacoOrder> findAll() {
         return orderRepository.findAll();
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    public void deleteAllOrders() {
+        orderRepository.deleteAll();
     }
 }

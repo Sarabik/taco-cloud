@@ -10,4 +10,6 @@ public interface OrderService {
 
     List<TacoOrder> findAll();
 
+    void deleteAllOrders();
+
 }

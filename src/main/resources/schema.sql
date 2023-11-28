@@ -28,3 +28,4 @@ id serial primary key,
 ingredient varchar(4) not null references Ingredient(id),
 taco bigint not null references Taco(id)
 );
+

@@ -15,6 +15,7 @@ import org.hibernate.validator.constraints.CreditCardNumber;
 
 @Data
 @Entity
+@Table(name = "Taco_Order")
 public class TacoOrder implements Serializable {
 
     @Serial
@@ -57,4 +58,7 @@ public class TacoOrder implements Serializable {
     public void addTaco(Taco taco) {
         tacos.add(taco);
     }
+
+    @ManyToOne
+    private User user;
 }
