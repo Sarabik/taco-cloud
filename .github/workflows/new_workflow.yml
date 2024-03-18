@@ -1,3 +1,5 @@
+name: Reopen Issue on Comment
+
 on:
   issue_comment:
     types: [created]
@@ -5,20 +7,10 @@ on:
 jobs:
   reopen_issue:
     runs-on: ubuntu-latest
+    env:
+      ISSUE_NUMBER: ${{ github.event.issue.number }}
     steps:
-      - name: Check if the comment is on a pull request
-        id: is_pull_request_comment
-        run: echo "::set-output name=is_pull_request_comment::${{ github.event.issue.pull_request != null }}"
-      - name: Get the issue number
-        if: steps.is_pull_request_comment.outputs.is_pull_request_comment == 'true'
-        id: extract_issue_number
-        run: echo "::set-output name=issue_number::$(echo ${GITHUB_REF#refs/pull/} | cut -d/ -f1)"
       - name: Reopen related issue
-        run: |
-          if [ "${{ steps.is_pull_request_comment.outputs.is_pull_request_comment }}" == "true" ]; then
-            gh issue reopen ${{ steps.extract_issue_number.outputs.issue_number }}
-          else
-            gh issue reopen ${{ github.event.issue.number }}
-          fi
+        run: gh issue reopen $ISSUE_NUMBER
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
