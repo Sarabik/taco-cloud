@@ -6,16 +6,23 @@ on:
 
 env:
   GH_TOKEN: ${{ github.token }}
+  PULL_NUMBER: 0
+  PULL_STATE: "NULL"
+  PULL_CLOSED: false
   ISSUE_NUMBER: 0
+  ISSUE_STATE: "NULL"
+  ISSUE_STATE_CLOSED: "NULL"
+  PULL_NUM: 1
+
 jobs:
   issue-status-reopen:
     runs-on: ubuntu-latest
     steps:
-      - name: Getting issue number
+      - name: Getting information about a pull request
         run: |
-          echo "Getting information about a linked issue number..."
-
-          pull_info=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json headRefName)
+          echo "Getting information about a pull request..."
+          
+          pull_info=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json title,number,state,closed,headRefName)
           response_code=$?
           
           if [ "$response_code" -ne 0 ]; then
@@ -23,12 +30,72 @@ jobs:
             exit 1
           fi
 
+          pull_title=$(echo "$pull_info" | jq -r '.title')
+          PULL_NUMBER=$(echo "$pull_info" | jq -r '.number')
+          PULL_STATE=$(echo "$pull_info" | jq -r '.state')
+          PULL_CLOSED=$(echo "$pull_info" | jq -r '.closed')
           linked_issue_name=$(echo "$pull_info" | jq -r '.headRefName')
           ISSUE_NUMBER=$(echo "$linked_issue_name" | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
           
-          echo " - Issue num: $ISSUE_NUMBER"
+          echo "Pull request info:"
+          echo " - Pull title: $pull_title"
+          echo " - Pull number: $PULL_NUMBER"
+          echo " - Pull status: $PULL_STATE"
+          echo " - Pull closed: $PULL_CLOSED"
+          echo " - Linked Issue: $linked_issue_name"
           
           echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> $GITHUB_ENV
+          echo "PULL_NUMBER=$PULL_NUMBER" >> $GITHUB_ENV
+          echo "PULL_STATE=$PULL_STATE" >> $GITHUB_ENV
+          echo "PULL_CLOSED=$PULL_CLOSED" >> $GITHUB_ENV
+
+      - name: Checking the linked issue
+        run: |
+          echo "Checking the linked issue..."
+          
+          issue_info=$(gh issue view $ISSUE_NUMBER --repo ${{ github.repository }} --json title,state,closed)
+          response_code=$?
+          
+          if [ "$response_code" -ne 0 ]; then
+            echo "ERROR: Request failed with exit status ${response_code}!"
+            exit 1
+          fi
+          
+          echo "Linked issue info:"
+          
+          issue_title=$(echo "$issue_info" | jq -r '.title')
+          ISSUE_STATE=$(echo "$issue_info" | jq -r '.state')
+          ISSUE_STATE_CLOSED=$(echo "$issue_info" | jq -r '.closed')
+          
+          echo " - Issue title: $issue_title"
+          echo " - Issue num: $ISSUE_NUMBER"
+          echo " - Issue status: $ISSUE_STATE"
+          echo " - Issue status closed: $ISSUE_STATE_CLOSED"
+          
+          echo "ISSUE_STATE=$ISSUE_STATE" >> $GITHUB_ENV
+          echo "ISSUE_STATE_CLOSED=$ISSUE_STATE_CLOSED" >> $GITHUB_ENV
+          
+          all_pulls=$(gh pr list --repo ${{ github.repository }} --json title)
+          response_code=$?
+          
+          if [ "$response_code" -ne 0 ]; then
+            echo "ERROR: Request failed with exit status ${response_code}!"
+            exit 1
+          fi
+          
+          count=$(echo "${all_pulls}" | jq -c '.[] | select(.title | test("'"${ISSUE_NUMBER}"'"))' | wc -l)
+          
+          if [ "${PULL_STATE}" = "CLOSED" ]; then
+            PULL_NUM=$(($PULL_NUM - 1))
+          fi
+          
+          if [ "${count}" -gt "${PULL_NUM}" ] && [ "${PULL_NUM}" -eq 1 ]; then
+            echo "ERROR: Found more than one pull request associated with issue with number ${ISSUE_NUMBER}. The number of pulls found is ${count}!"
+            exit 1
+          elif [ "${count}" -gt "${PULL_NUM}" ] && [ "${PULL_NUM}" -eq 0 ]; then
+            echo "ERROR: Found another one open pull request associated with issue with number ${ISSUE_NUMBER}."
+            exit 1
+          fi
 
       - name: Reopen the status of a linked issue
         run: |
