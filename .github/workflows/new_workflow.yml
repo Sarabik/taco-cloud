@@ -1,4 +1,4 @@
-name: Issue status reopen
+name: Change issue status reopen
 
 on:
   issue_comment:
