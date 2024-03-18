@@ -1,4 +1,4 @@
-name: Issue status synchronization
+name: Issue status reopen
 
 on:
   issue_comment:
@@ -8,16 +8,23 @@ env:
   GH_TOKEN: ${{ github.token }}
   ISSUE_NUMBER: 0
 jobs:
-  issue-status-synchronization:
+  issue-status-reopen:
     runs-on: ubuntu-latest
     steps:
       - name: Getting issue number
         run: |
           echo "Getting information about a linked issue number..."
+
+          pull_info=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json headRefName)
+          response_code=$?
           
-          pull_info=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json body)
-          linked_issues=$(echo "$pull_info" | jq -r '.body' | grep -oP '(?<=#)\d+')
-          ISSUE_NUMBER=$(echo "$linked_issues" | head -n 1)
+          if [ "$response_code" -ne 0 ]; then
+            echo "ERROR: Request failed with exit status ${response_code}!"
+            exit 1
+          fi
+
+          linked_issue_name=$(echo "$pull_info" | jq -r '.headRefName')
+          ISSUE_NUMBER=$(echo "$linked_issue_name" | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
           
           echo " - Issue num: $ISSUE_NUMBER"
           
