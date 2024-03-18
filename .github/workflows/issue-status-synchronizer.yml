@@ -3,6 +3,9 @@ name: Issue status synchronization
 on:
   pull_request:
     types: [opened, reopened, review_requested, closed, synchronize]
+  pull_request_review:
+    types: [ submitted ]
+    if: ${{ github.event.review.state == 'changes_requested' }}
 
 env:
   GH_TOKEN: ${{ github.token }}
