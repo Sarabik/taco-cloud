@@ -8,7 +8,7 @@ jobs:
   reopen_issue:
     runs-on: ubuntu-latest
     env:
-      ISSUE_NUMBER: ${{ github.event.issue.number }}
+      ISSUE_NUMBER: "#${{ github.event.issue.number }}"
     steps:
       - name: Reopen related issue
         run: gh issue reopen $ISSUE_NUMBER
