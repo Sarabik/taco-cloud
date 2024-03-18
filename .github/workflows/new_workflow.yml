@@ -1,0 +1,42 @@
+name: Issue status synchronization
+
+on:
+  issue_comment:
+    types: [created]
+
+env:
+  GH_TOKEN: ${{ github.token }}
+  ISSUE_NUMBER: 0
+jobs:
+  issue-status-synchronization:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Getting issue number
+        if: contains(github.event.comment.body, 'alalala')
+        run: |
+          echo "Getting information about a linked issue number..."
+          
+          pull_info=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json body)
+          linked_issues=$(echo "$pull_info" | jq -r '.body' | grep -oP '(?<=#)\d+')
+          ISSUE_NUMBER=$(echo "$linked_issues" | head -n 1)
+          
+          echo " - Issue num: $ISSUE_NUMBER"
+          
+          echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> $GITHUB_ENV
+
+      - name: Reopen the status of a linked issue
+        if: contains(github.event.comment.body, 'alalala')
+        run: |
+          echo "Reopening the status of a linked issue..."
+          
+          if [ -z "$ISSUE_NUMBER" ] || [ "$ISSUE_NUMBER" -eq 0 ]; then
+            echo "No linked issue number found or extracted."
+            exit 1
+          else
+             if ! changing_status=$(gh issue reopen $ISSUE_NUMBER --repo ${{ github.repository }} 2>&1); then
+                 echo "ERROR: Failed to reopen issue: $changing_status"
+                 exit 1
+             else
+                 echo "Issue reopened successfully!"
+             fi
+          fi
