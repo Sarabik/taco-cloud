@@ -13,7 +13,6 @@ import lombok.Data;
 @Entity
 public class Taco {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
