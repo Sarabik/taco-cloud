@@ -1,0 +1,22 @@
+name: Reopen Issue on Comment 2
+
+on:
+  pull_request:
+    types: [synchronize]
+
+jobs:
+  get_headRefName:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Get pull request headRefName
+        id: pr_info
+        run: |
+          headRefName=$(gh pr view ${{ github.event.number }} --json headRefName --jq '.headRefName')
+          echo "::set-output name=headRefName::$headRefName"
+
+      - name: Print headRefName
+        run: |
+          echo "headRefName: ${{ steps.pr_info.outputs.headRefName }}"
