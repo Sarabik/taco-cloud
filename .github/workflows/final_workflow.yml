@@ -21,7 +21,7 @@ jobs:
         run: |
           echo "Getting information about a pull request and related issue..."
           
-          headRefName=$(gh pr view ${{ github.event.number }} --json headRefName --jq '.headRefName')
+          headRefName=$(gh pr view ${{ github.event.pull_request.number }} --json headRefName --jq '.headRefName')
           response_code=$?
           if [ "$response_code" -ne 0 ]; then
             echo "ERROR: Request failed with exit status ${response_code}!"
