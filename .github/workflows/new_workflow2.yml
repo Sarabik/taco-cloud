@@ -25,3 +25,16 @@ jobs:
           echo " - Linked issue number: $ISSUE_NUMBER"
           
           echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> $GITHUB_ENV
+
+      - name: Reopen related issue
+        run: |
+          echo "Trying to reopen issue..."
+          echo "Issue number: $ISSUE_NUMBER"
+
+          reopen_issue=$(gh issue reopen $ISSUE_NUMBER --repo ${{ github.repository }})
+          response_code=$?
+
+          if [ "$response_code" -ne 0 ]; then
+            echo "ERROR: Request failed with exit status ${response_code}!"
+            exit 1
+          fi
