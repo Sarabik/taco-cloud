@@ -7,6 +7,7 @@ on:
 env:
   GH_TOKEN: ${{ github.token }}
   ISSUE_NUMBER: 0
+  ISSUE_STATE: "NULL"
 
 jobs:
   get_headRefName:
@@ -20,12 +21,27 @@ jobs:
           echo "Getting information about a pull request and related issue..."
           
           headRefName=$(gh pr view ${{ github.event.number }} --json headRefName --jq '.headRefName')
+          response_code=$?
+          if [ "$response_code" -ne 0 ]; then
+            echo "ERROR: Request failed with exit status ${response_code}!"
+            exit 1
+          fi
           echo "PR headRefName: $headRefName"
           
           ISSUE_NUMBER=$(echo "$headRefName" | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
+          response_code=$?
           echo "Linked issue number: $ISSUE_NUMBER"
           
+          ISSUE_STATE=$(gh issue view $ISSUE_NUMBER --json state --jq '.state')
+          response_code=$?
+          if [ "$response_code" -ne 0 ]; then
+            echo "ERROR: Request failed with exit status ${response_code}!"
+            exit 1
+          fi
+          echo "Issue state: $ISSUE_STATE"
+    
           echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> $GITHUB_ENV
+          echo "$ISSUE_STATE=$ISSUE_STATE" >> $GITHUB_ENV
 
       - name: Reopen related issue
         run: |
