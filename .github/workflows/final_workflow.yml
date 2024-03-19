@@ -1,8 +1,8 @@
 name: Reopen issue when code changes requested
 
 on:
-  pull_request:
-    types: [synchronize]
+  pull_request_review:
+    types: [submitted]
 
 env:
   GH_TOKEN: ${{ github.token }}
@@ -11,6 +11,7 @@ env:
 
 jobs:
   reopen_issue:
+    if: github.event.review.state == 'changes_requested'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -39,7 +40,7 @@ jobs:
             exit 1
           fi
           echo "Issue state: $ISSUE_STATE"
-    
+          
           echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> $GITHUB_ENV
           echo "ISSUE_STATE=$ISSUE_STATE" >> $GITHUB_ENV
 
@@ -53,7 +54,7 @@ jobs:
             echo "Trying to close issue..."
             close_issue=$(gh issue close $ISSUE_NUMBER --repo ${{ github.repository }})
             response_code=$?
-            
+          
             if [ "$response_code" -ne 0 ]; then
               echo "ERROR: Request failed with exit status ${response_code}!"
               exit 1
