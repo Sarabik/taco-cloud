@@ -1,16 +1,42 @@
 name: Reopen Issue on Comment
 
 on:
-  issue_comment:
-    types: [created]
+  pull_request:
+    types: [synchronize]
+
+env:
+  GH_TOKEN: ${{ github.token }}
+  PULL_NUMBER: 0
+  ISSUE_NUMBER: 0
 
 jobs:
   reopen_issue:
     runs-on: ubuntu-latest
-    env:
-      ISSUE_NUMBER: ${{ github.event.issue.number }}
     steps:
+      - name: Getting information about a pull request and related issue
+        run: |
+          echo "Getting information about a pull request and related issue..."
+          
+          pull_info=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json title,number,state,closed,headRefName)
+          response_code=$?
+          
+          PULL_NUMBER=$(echo "${{ github.event.pull_request.url }}" | awk -F'/' '{print $NF}')
+          echo " - Pull request number: $PULL_NUMBER"
+          
+          ISSUE_NUMBER=$(gh pr view $PULL_NUMBER --json number --jq '.issue.number')
+          echo " - Linked issue number: $ISSUE_NUMBER"
+          
+          echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> $GITHUB_ENV
+          echo "PULL_NUMBER=$PULL_NUMBER" >> $GITHUB_ENV
+
       - name: Reopen related issue
-        run: gh issue reopen $ISSUE_NUMBER
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Trying to reopen issue..."
+          
+          reopen_issue=$(gh issue reopen $ISSUE_NUMBER --repo ${{ github.repository }})
+          response_code=$?
+
+          if [ "$response_code" -ne 0 ]; then
+            echo "ERROR: Request failed with exit status ${response_code}!"
+            exit 1
+          fi
