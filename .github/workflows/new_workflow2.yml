@@ -49,7 +49,7 @@ jobs:
           echo "Issue number: $ISSUE_NUMBER"
           echo "Issue state: $ISSUE_STATE"
           
-          if [ "$ISSUE_STATE" = "OPEN" ]; then
+          if [ "$ISSUE_STATE" == "OPEN" ]; then
             echo "Trying to close issue..."
             close_issue=$(gh issue close $ISSUE_NUMBER --repo ${{ github.repository }})
             response_code=$?
