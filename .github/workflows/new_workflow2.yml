@@ -6,7 +6,7 @@ on:
 
 env:
   GH_TOKEN: ${{ github.token }}
-  PULL_NUMBER: 0
+  ISSUE_NUMBER: 0
 
 jobs:
   get_headRefName:
@@ -20,3 +20,8 @@ jobs:
         run: |
           headRefName=$(gh pr view ${{ github.event.number }} --json headRefName --jq '.headRefName')
           echo "$headRefName"
+          
+          ISSUE_NUMBER=$(echo "$linked_issue_name" | awk 'match($0, /[0-9]+/) {print substr($0, RSTART, RLENGTH)}')
+          echo " - Linked issue number: $ISSUE_NUMBER"
+          
+          echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> $GITHUB_ENV
