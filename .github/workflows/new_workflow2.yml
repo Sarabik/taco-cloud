@@ -4,6 +4,10 @@ on:
   pull_request:
     types: [synchronize]
 
+env:
+  GH_TOKEN: ${{ github.token }}
+  PULL_NUMBER: 0
+
 jobs:
   get_headRefName:
     runs-on: ubuntu-latest
