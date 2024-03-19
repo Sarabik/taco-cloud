@@ -17,13 +17,10 @@ jobs:
         run: |
           echo "Getting information about a pull request and related issue..."
           
-          pull_info=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json title,number,state,closed,headRefName)
-          response_code=$?
-          
           PULL_NUMBER=$(echo "${{ github.event.pull_request.url }}" | awk -F'/' '{print $NF}')
           echo " - Pull request number: $PULL_NUMBER"
           
-          pull_info=$(gh pr view $PULL_REQUEST_NUMBER --repo ${{ github.repository }} --json headRefName)
+          pull_info=$(gh pr view $PULL_REQUEST_NUMBER --repo ${{ github.repository }} --json headRefName --jq '.headRefName')
           echo "pull_info: $pull_info"
           
           linked_issue_name=$(echo "$pull_info" | jq -r '.headRefName')
