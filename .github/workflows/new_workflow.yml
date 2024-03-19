@@ -20,6 +20,8 @@ jobs:
           PULL_NUMBER=$(echo "${{ github.event.pull_request.url }}" | awk -F'/' '{print $NF}')
           echo " - Pull request number: $PULL_NUMBER"
           
+          echo "${{ github.repository }}"
+          
           pull_info=$(gh pr view $PULL_REQUEST_NUMBER --repo $(echo ${{ github.repository }}) --json number,headRefName)
           echo "pull_info: $pull_info"
           
