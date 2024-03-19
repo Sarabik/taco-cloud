@@ -22,7 +22,7 @@ jobs:
           
           repo_name="${{ github.repository }}"
           
-          pull_info=$(gh pr view $PULL_REQUEST_NUMBER --json number,headRefName --repo $repo_name)
+          pull_info=$(gh pr view $PULL_REQUEST_NUMBER $repo_name --json number,headRefName)
           echo "pull_info: $pull_info"
           
           linked_issue_name=$(echo "$pull_info" | jq -r '.headRefName')
