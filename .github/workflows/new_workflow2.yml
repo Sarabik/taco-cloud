@@ -49,6 +49,7 @@ jobs:
           echo "Issue number: $ISSUE_NUMBER"
           
           if [ "$ISSUE_STATE" = "OPEN" ]; then
+            echo "Trying to close issue..."
             close_issue=$(gh issue close $ISSUE_NUMBER --repo ${{ github.repository }})
             response_code=$?
             
@@ -58,6 +59,7 @@ jobs:
             fi
           fi
 
+          echo "Trying to open issue..."
           reopen_issue=$(gh issue reopen $ISSUE_NUMBER --repo ${{ github.repository }})
           response_code=$?
 
