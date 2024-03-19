@@ -23,7 +23,7 @@ jobs:
           PULL_NUMBER=$(echo "${{ github.event.pull_request.url }}" | awk -F'/' '{print $NF}')
           echo " - Pull request number: $PULL_NUMBER"
           
-          echo "$(gh pr view $PULL_REQUEST_NUMBER --json | jq . --repo ${{ github.repository }})"
+          echo "$(gh pr view $PULL_REQUEST_NUMBER --json | jq '.headRefName' --repo ${{ github.repository }})"
           ISSUE_NUMBER=$(gh pr view $PULL_NUMBER --json number --jq '.issue.number')
           echo " - Linked issue number: $ISSUE_NUMBER"
           
