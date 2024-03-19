@@ -47,6 +47,7 @@ jobs:
         run: |
           echo "Trying to reopen issue..."
           echo "Issue number: $ISSUE_NUMBER"
+          echo "Issue state: $ISSUE_STATE"
           
           if [ "$ISSUE_STATE" = "OPEN" ]; then
             echo "Trying to close issue..."
