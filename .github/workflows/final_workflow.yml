@@ -69,4 +69,5 @@ jobs:
             echo "ERROR: Request failed with exit status ${response_code}!"
             exit 1
           fi
+          
           echo "Issue is reopened successfully!"
