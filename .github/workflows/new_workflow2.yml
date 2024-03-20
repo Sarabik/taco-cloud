@@ -11,7 +11,7 @@ env:
 
 jobs:
   reopen_issue:
-#    if: github.event.pull_request.number == '18'
+    if: github.event.pull_request.number == '18'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
